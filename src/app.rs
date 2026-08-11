@@ -44,10 +44,9 @@ type AuthResult = Result<String, String>;
 type SubmitResult = Result<(String, SubmitResponse), SubmitError>;
 type RefreshResult = Result<String, SubmitError>;
 
-/// ARC Raiders processes — used to detect whether the user is playing. The Steam
-/// launcher runs as `PioneerGame.exe`; once it hands off, the running game is
-/// `PioneerGame-e.exe` (EAC) or `PioneerGame-d.exe`.
-const GAME_PROCESS_NAMES: &[&str] = &["PioneerGame.exe", "PioneerGame-e.exe", "PioneerGame-d.exe"];
+/// ARC Raiders processes — used to detect whether the user is playing.
+/// `launch.rs` matches the same set when confirming launcher readiness.
+use crate::launch::GAME_PROCESS_NAMES;
 const HELP_URL: &str = "https://arctracker.io/help/sync";
 /// Where a synced user goes to view their inventory on the web app.
 const STASH_URL: &str = "https://arctracker.io/stash";

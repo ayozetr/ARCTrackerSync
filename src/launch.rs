@@ -147,6 +147,28 @@ impl SyncKeySource {
     }
 }
 
+/// ARC Raiders processes. The Steam launcher runs as `PioneerGame.exe`; once it
+/// hands off, the running game is `PioneerGame-e.exe` (EAC) or
+/// `PioneerGame-d.exe`.
+pub const GAME_PROCESS_NAMES: &[&str] =
+    &["PioneerGame.exe", "PioneerGame-e.exe", "PioneerGame-d.exe"];
+
+/// Whether a running game process already has `SSLKEYLOGFILE` pointing at
+/// `setup_path`.
+fn game_has_sync_key(setup_path: &Path) -> bool {
+    GAME_PROCESS_NAMES.iter().any(|name| {
+        process_env::find_processes(name)
+            .unwrap_or_default()
+            .iter()
+            .any(|process| {
+                process_env::process_environment_value(process.pid, "SSLKEYLOGFILE")
+                    .ok()
+                    .flatten()
+                    .is_some_and(|value| same_path_text(&value, setup_path))
+            })
+    })
+}
+
 pub fn launcher_readiness(
     selected_platform: LauncherPlatform,
     game_executable: Option<&Path>,
@@ -159,6 +181,21 @@ pub fn launcher_readiness(
             status: LauncherStatus::Ready,
             process_count: 0,
             detail: "Direct launch selected".to_string(),
+        };
+    }
+
+    // The launcher matters only as the thing that puts the key log into the
+    // game's environment, so a game already holding it settles the question and
+    // the launcher's own environment stops being evidence of anything. Steam's
+    // per-game launch options do exactly that, and they never reach the Steam
+    // process itself — checking only the launcher reports "needs restart" while
+    // sync is demonstrably working, and offers to kill a running game to fix it.
+    if game_has_sync_key(setup_path) {
+        return LauncherReadiness {
+            platform,
+            status: LauncherStatus::Ready,
+            process_count: 0,
+            detail: "ARC Raiders is running with the sync key set".to_string(),
         };
     }
 
