@@ -1,0 +1,43 @@
+# Unofficial Arch package for a local build of ARCTracker Sync.
+#
+# Unlike the .deb and .rpm, this one compiles against the system toolchain: it
+# is meant for this machine, not for redistribution, so there is no reason to
+# pin an older glibc.
+pkgname=arctracker-sync
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="Sync your ARC Raiders inventory to ARCTracker (unofficial build)"
+arch=('x86_64')
+url="https://arctracker.io"
+# PolyForm Noncommercial 1.0.0: free for noncommercial use, commercial use
+# needs a separate licence. Not an OSI-approved licence, hence 'custom'.
+license=('custom:PolyForm-Noncommercial-1.0.0')
+depends=('libxkbcommon' 'libx11' 'libxcursor' 'libxrandr' 'libxi' 'libglvnd' 'libcap')
+optdepends=('xdg-desktop-portal: file dialogs'
+            'steam: launching ARC Raiders through Proton')
+makedepends=('cargo')
+install="${pkgname}.install"
+# Built from the working tree rather than a release tarball: upstream publishes
+# no Linux release, so there is no source archive to point at.
+source=()
+sha256sums=()
+
+pkgver() {
+    grep -m1 '^version' "${startdir}/../../Cargo.toml" | cut -d'"' -f2
+}
+
+build() {
+    cd "${startdir}/../.."
+    cargo build --release --locked
+}
+
+package() {
+    cd "${startdir}/../.."
+    install -Dm755 target/release/arctracker-sync "${pkgdir}/usr/bin/arctracker-sync"
+    install -Dm644 packaging/arctracker-sync.desktop \
+        "${pkgdir}/usr/share/applications/arctracker-sync.desktop"
+    install -Dm644 assets/arc-mark.png \
+        "${pkgdir}/usr/share/icons/hicolor/256x256/apps/arctracker-sync.png"
+    install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+    install -Dm644 packaging/README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+}

@@ -1,0 +1,37 @@
+# Capture opens an AF_PACKET socket, which needs CAP_NET_RAW. Granting it on
+# the binary keeps the GUI itself unprivileged — running the whole app as root
+# is the alternative, and a root process cannot reach the user's Wayland
+# session anyway.
+#
+# Re-applied on upgrade because pacman replaces the file, and a replaced file
+# does not keep the capability.
+_grant_capture_capability() {
+    if setcap cap_net_raw+ep /usr/bin/arctracker-sync 2>/dev/null; then
+        return
+    fi
+    echo "==> arctracker-sync: could not grant CAP_NET_RAW; capture will not work."
+    echo "    Check that / is not mounted nosuid and supports extended attributes."
+}
+
+post_install() {
+    _grant_capture_capability
+    cat <<'EOF'
+==> ARCTracker Sync needs the game's TLS keys to work. Either let the app
+    restart Steam itself, or set this as ARC Raiders' Steam launch options:
+
+      SSLKEYLOGFILE=$HOME/.local/share/sync/sync-key.log %command%
+
+==> Start the app BEFORE the game: capture can only decrypt handshakes it
+    actually witnesses, so a game that is already running must be restarted.
+EOF
+}
+
+post_upgrade() {
+    _grant_capture_capability
+}
+
+post_remove() {
+    echo "==> Per-user data left in place. To remove it:"
+    echo "    rm -rf ~/.config/sync ~/.local/share/sync"
+    echo "    (that includes the TLS key log, which can decrypt captured sessions)"
+}

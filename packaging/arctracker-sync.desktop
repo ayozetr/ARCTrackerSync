@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=ARCTracker Sync
+GenericName=ARC Raiders inventory sync
+Comment=Keep your ARC Raiders inventory in sync with ARCTracker
+Exec=arctracker-sync
+Icon=arctracker-sync
+Terminal=false
+Categories=Game;Utility;
+Keywords=ARC;Raiders;ARCTracker;inventory;sync;
+StartupNotify=true
+StartupWMClass=arctracker-sync

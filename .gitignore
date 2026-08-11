@@ -24,3 +24,4 @@ SHA256SUMS
 /.vscode/
 /.idea/
 /.claude/settings.local.json
+packaging/out/

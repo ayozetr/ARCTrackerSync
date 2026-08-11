@@ -1,0 +1,29 @@
+#!/bin/sh
+# Grant the capture capability. Packaged rather than left to the user because
+# the app is unusable without it: opening an AF_PACKET socket needs CAP_NET_RAW,
+# and the alternative is running the whole GUI as root.
+#
+# Applied here rather than shipped on the file inside the .deb so it survives
+# archives and transports that drop extended attributes.
+set -e
+
+case "$1" in
+configure)
+    if command -v setcap >/dev/null 2>&1; then
+        if ! setcap cap_net_raw+ep /usr/bin/arctracker-sync 2>/dev/null; then
+            # Filesystems mounted nosuid, or without xattr support, silently
+            # refuse. Say so: capture would otherwise fail with a permission
+            # error the user cannot place.
+            echo "arctracker-sync: could not grant CAP_NET_RAW." >&2
+            echo "  Packet capture will not work. Run the app as root, or move" >&2
+            echo "  the install to a filesystem that supports file capabilities." >&2
+        fi
+    else
+        echo "arctracker-sync: setcap not found (install libcap2-bin), so" >&2
+        echo "  CAP_NET_RAW was not granted and capture will not work." >&2
+    fi
+    ;;
+esac
+
+#DEBHELPER#
+exit 0

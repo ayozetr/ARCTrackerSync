@@ -1,0 +1,17 @@
+#!/bin/sh
+# The binary goes away with the package, and its capability with it. What does
+# not go away is the app's own data — the config, the session token and any TLS
+# key log — so point at it on purge instead of deleting a user's files from a
+# maintainer script.
+set -e
+
+case "$1" in
+purge)
+    echo "arctracker-sync: per-user data was left in place. To remove it:" >&2
+    echo "  rm -rf ~/.config/sync ~/.local/share/sync" >&2
+    echo "  (that includes the TLS key log, which can decrypt captured sessions)" >&2
+    ;;
+esac
+
+#DEBHELPER#
+exit 0

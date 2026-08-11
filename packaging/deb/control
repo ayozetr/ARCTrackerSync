@@ -1,0 +1,28 @@
+Package: arctracker-sync
+Version: @VERSION@
+Section: games
+Priority: optional
+Architecture: @ARCH@
+Maintainer: ARCTracker Sync Linux packaging <noreply@example.invalid>
+Depends: libc6 (>= 2.36), libgcc-s1, libxkbcommon0, libwayland-client0, libwayland-cursor0, libwayland-egl1, libx11-6, libxcursor1, libxrandr2, libxi6, libgl1, libcap2-bin
+Recommends: xdg-desktop-portal
+Homepage: https://arctracker.io
+Description: Sync your ARC Raiders inventory to ARCTracker (unofficial Linux build)
+ Keeps an ARCTracker inventory up to date while ARC Raiders runs under Proton.
+ It watches this machine's own network traffic for the game's connection to the
+ Embark gateway, decrypts it with the TLS session keys the game writes to
+ SSLKEYLOGFILE, and posts the resulting sync key to ARCTracker.
+ .
+ Unofficial community build. Upstream (RaidTheory LLC) publishes Windows
+ releases only; this package is built from source and is not supported by them.
+ .
+ What it needs to work, and what that means:
+  * CAP_NET_RAW on /usr/bin/arctracker-sync, granted on install. The app reads
+    packets on your network interface; it never leaves this machine.
+  * A TLS key log the game writes. Anyone who can read that file can decrypt
+    every HTTPS session the game made while it existed, including the account
+    token. It lives under your user's data directory and the app deletes the
+    one it manages when capture stops.
+ .
+ Licensed under PolyForm Noncommercial 1.0.0: free for noncommercial use,
+ commercial use requires a separate licence from RaidTheory LLC.
